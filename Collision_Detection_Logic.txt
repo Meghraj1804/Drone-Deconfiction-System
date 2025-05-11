@@ -1,0 +1,56 @@
+
+Collision Detection Logic – Detailed Documentation
+
+🎯 Purpose
+The purpose of the collision detection logic is to identify when two or more drones come too close to each other during their missions, violating a defined minimum safe distance (also known as the safety buffer).
+This helps ensure spatial deconfliction and supports safe multi-drone operations.
+
+📁 Where It Is Used
+The logic is implemented in the method:
+    def _check_collision(self, pos1, pos2, threshold=0.1):
+This method is called repeatedly within the animation update loop as each drone's position changes over time.
+
+⚙️ Logic Breakdown
+
+1. Distance-Based Collision Check
+We use the Euclidean distance formula to measure how far apart two drones are at any point in time:
+    np.linalg.norm(np.array(pos1) - np.array(pos2))
+
+2. Threshold Comparison
+A collision is detected if the distance is less than a defined threshold (e.g., 0.1 meters):
+    return np.linalg.norm(np.array(pos1) - np.array(pos2)) < threshold
+
+3. Checking All Pairs of Drones
+Within each update step (in _update_loop()), we:
+- Compute current positions of all drones.
+- Iterate over all unique pairs of drones (using a nested loop).
+- Call _check_collision(pos1, pos2) for each pair.
+If a collision is found, we:
+- Log the conflict time
+- Log the collision location
+- Identify the two involved drones
+- Optionally trigger a callback function (to update UI or report table)
+
+💡 Example
+If Drone A is at (1.0, 0.0, 0.0) and Drone B is at (1.05, 0.0, 0.0), and the threshold is 0.1, the system detects a collision, because their distance is 0.05.
+
+🛠 Code Snippet in Context
+    def _check_collision(self, pos1, pos2, threshold=0.1):
+        return np.linalg.norm(np.array(pos1) - np.array(pos2)) < threshold
+
+    Called from _update_loop():
+        for i in range(len(positions)):
+            for j in range(i + 1, len(positions)):
+                if self._check_collision(positions[i], positions[j]):
+                    if self.collision_callback:
+                        self.collision_callback(
+                            self.trajectory_names[i],
+                            self.trajectory_names[j],
+                            positions[i],
+                            elapsed
+                        )
+
+✅ Benefits
+- Efficient: Only checks at current time step, no unnecessary future predictions.
+- Simple: Easy to understand, modify, or extend.
+- Real-Time Ready: Can be called every frame in an animation or during live simulation.

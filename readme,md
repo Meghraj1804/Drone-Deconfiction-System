@@ -1,0 +1,100 @@
+# README: Drone Deconfliction System
+
+## Overview
+
+This project implements a 3D drone trajectory visualization and deconfliction system. It detects spatial and temporal conflicts between multiple drones in simulated airspace and reports these conflicts via a GUI.
+
+## Features
+
+* 3D trajectory visualization using Matplotlib and Tkinter.
+* Real-time animation of drone movement.
+* Spatial and temporal conflict detection.
+* Collision report table within the GUI.
+* Modular architecture with easy JSON input for flight paths.
+
+## Prerequisites
+
+* Python 3.8+
+* Required libraries:
+
+  ```bash
+  pip install - requirements.txt
+  ```
+
+## Folder Structure
+
+```
+project/
+├── trajectories/        # JSON trajectory files
+├── main.py              # Main GUI runner
+├── trajectory_visualizer.py  # Core visualization and conflict logic
+├── README.md
+└── reflection.pdf       # Design discussion
+```
+
+## Running the Project
+
+1. Place JSON trajectory files into the `trajectories/` directory.
+2. Run the main application:
+
+   ```bash
+   python main.py
+   ```
+3. Use the GUI to select trajectories and start animation.
+
+## JSON Format Example
+
+```json
+[
+  {"x": 1.0, "y": 0.0, "z": 0.0},
+  {"x": 1.1, "y": 0.1, "z": 0.0},
+  ...
+]
+```
+
+---
+
+# Reflection & Justification Document
+
+## Design Decisions & Architecture
+
+We designed a modular Python system using Matplotlib for 3D plotting and Tkinter for GUI management. We separated logic into visualization, conflict checking, and GUI control for clarity and maintainability.
+
+The visualization component uses animated markers to represent each drone. This allows easy extension to incorporate more complex behavior like velocity vectors or trajectory adjustments.
+
+## Spatial and Temporal Checks
+
+### Spatial Conflict
+
+Each drone's current position is updated in real time. We use Euclidean distance to compare all pairwise positions and flag a conflict when the distance falls below a safety threshold (e.g., 0.1 meters).
+
+### Temporal Conflict
+
+Temporal conflicts are detected by ensuring the same airspace is not occupied by more than one drone during overlapping segments of the simulation time.
+
+Each point in the trajectory is mapped to a normalized time within the total duration, allowing interpolation and timing alignment.
+
+## AI Integration
+
+There is no direct AI integration in this version. However, the modular structure allows easy integration of predictive models or path-planning AI components in the future.
+
+## Testing Strategy and Edge Cases
+
+* Unit tests were used to validate conflict detection logic.
+* Edge cases tested:
+
+  * Drones with identical paths but different timing.
+  * Drones starting from the same point.
+  * Drones with paths that cross but at different altitudes.
+
+## Scalability Plan for Real-World Use
+
+To support real-time deconfliction for tens of thousands of drones:
+
+* **Distributed Computing**: Partition the airspace and distribute trajectory computations across a cluster.
+* **Stream Processing**: Use tools like Apache Kafka and Spark Streaming to process incoming drone telemetry in real-time.
+* **Efficient Algorithms**: Replace pairwise comparison (O(n^2)) with spatial indexing using R-trees or k-d trees.
+* **Fault Tolerance**: Use stateless microservices with checkpointing and redundancy.
+* **Visualization Scaling**: Offload heavy rendering to WebGL-based frontends or GPU-accelerated backends.
+
+This system is a solid prototype that lays the foundation for a much larger, scalable real-time airspace monitoring tool.
